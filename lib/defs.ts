@@ -87,11 +87,14 @@ export class INgerDecorator<T = any, O = any> {
 }
 export class IClassDecorator<T = any, O = any> {
     private _type: Type<T>;
-    private _options: O;
+    private _options: O | undefined;
     private _metadataKey: string;
     private _params: any[];
-    get options(): O {
-        return { ...this._options };
+    get options(): O | undefined {
+        return this._options;
+    }
+    set options(o: O | undefined) {
+        this._options = o;
     }
     get type() {
         return this._type;
@@ -111,15 +114,18 @@ export class IClassDecorator<T = any, O = any> {
 }
 export class IConstructorDecorator<T = any, O = any>{
     private _type: Type<T>;
-    private _options: O;
+    private _options: O | undefined;
     private _parameterIndex: number;
     private _parameterTypes: any[];
     private _parameterType: any;
     get type() {
         return this._type;
     }
-    get options() {
+    get options(): O | undefined {
         return this._options;
+    }
+    set options(o: O | undefined) {
+        this._options = o;
     }
     get parameterIndex() {
         return this._parameterIndex;
@@ -147,7 +153,7 @@ export class IParameterDecorator<T = any, O = any> {
     private _type: Type<T>;
     private _property: string | symbol;
     private _parameterIndex: number;
-    private _options: O;
+    private _options: O | undefined;
     private _parameterTypes: any[];
     get instance() {
         return this._instance;
@@ -161,8 +167,11 @@ export class IParameterDecorator<T = any, O = any> {
     get parameterIndex() {
         return this._parameterIndex;
     }
-    get options() {
+    get options(): O | undefined {
         return this._options;
+    }
+    set options(o: O | undefined) {
+        this._options = o;
     }
     get parameterType() {
         return this._parameterTypes[this.parameterIndex];
@@ -196,8 +205,11 @@ export class IPropertyDecorator<T = any, O = any> {
     get type() {
         return this._type;
     }
-    get options() {
+    get options(): O | undefined {
         return this._options;
+    }
+    set options(o: O | undefined) {
+        this._options = o;
     }
     get propertyType() {
         return this._propertyType;
@@ -227,7 +239,7 @@ export class IMethodDecorator<T = any, O = any> {
     private _instance: T;
     private _type: Type<T>;
     private _descriptor: TypedPropertyDescriptor<any> | undefined;
-    private _options: O;
+    private _options: O | undefined;
     private _parameters: Set<IParameterDecorator> = new Set();
     private _returnType: any;
     private _paramTypes: any[];
@@ -240,8 +252,11 @@ export class IMethodDecorator<T = any, O = any> {
     get parameters() {
         return [...this._parameters];
     }
-    get options() {
+    get options(): O | undefined {
         return this._options;
+    }
+    set options(o: O | undefined) {
+        this._options = o;
     }
     get descriptor() {
         return this._descriptor;
