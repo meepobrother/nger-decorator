@@ -7,17 +7,7 @@
         "strict": true,
         "strictPropertyInitialization": false,
         "baseUrl": "./",
-        "paths": {
-            "@nger/decorator": [
-                "packages/decorator/lib/index.ts"
-            ],
-            "@nger/cli": [
-                "packages/cli/lib/index.ts"
-            ],
-            "@nger/plain-proto": [
-                "packages/plain-proto/lib/index.ts"
-            ]
-        },
+        "paths": {},
         "esModuleInterop": true,
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true
