@@ -36,6 +36,7 @@ export interface Type<T> extends Function {
     new(...args: any[]): T;
 }
 export class INgerDecorator<T = any, O = any> {
+    readonly type: Type<T>;
     private _classes: Set<IClassDecorator> = new Set();
     private _properties: Set<IPropertyDecorator> = new Set();
     private _constructors: Set<IConstructorDecorator> = new Set();
@@ -52,7 +53,9 @@ export class INgerDecorator<T = any, O = any> {
     get constructors() {
         return [...this._constructors];
     }
-    constructor() { }
+    constructor(type: Type<T>) {
+        this.type = type;
+    }
     addClass(item: IClassDecorator) {
         this._classes.add(item)
     }
@@ -72,15 +75,21 @@ export class INgerDecorator<T = any, O = any> {
         method.setReturnType(item.returnType);
         method.setParamTypes(item.paramTypes);
         method.setOptions(item.options);
+        method.setMetadataKey(item.metadataKey);
     }
     addMethodParameter(item: IParameterDecorator) {
-        const method = this.__getMethod(item.property, item.instance, item.type, item.metadataKey)
+        const method = this.__getMethod(item.property, item.instance, item.type)
         return method.addParameter(item)
     }
-    private __getMethod(property: TypeProperty, instance: T, type: Type<T>, metadataKey: string): IMethodDecorator {
-        let method = [...this._methods].find(it => it.property === property);
+    private __getMethod(property: TypeProperty, instance: T, type: Type<T>, metadataKey?: string): IMethodDecorator {
+        let method = [...this._methods].find(it => {
+            if (metadataKey && it.metadataKey) {
+                return it.property === property && it.metadataKey === metadataKey;
+            }
+            return it.property === property
+        });
         if (method) return method;
-        method = new IMethodDecorator(property, instance, type, undefined, undefined, undefined, undefined, metadataKey)
+        method = new IMethodDecorator(property, instance, type, undefined, undefined, undefined, undefined, undefined)
         this._methods.add(method);
         return method;
     }
@@ -270,7 +279,7 @@ export class IMethodDecorator<T = any, O = any> {
     get property() {
         return this._property;
     }
-    private _metadataKey: string;
+    private _metadataKey: string | undefined;
     get metadataKey() {
         return this._metadataKey;
     }
@@ -282,7 +291,7 @@ export class IMethodDecorator<T = any, O = any> {
         options: O,
         returnType: any,
         paramTypes: any,
-        metadataKey: string
+        metadataKey: string | undefined
     ) {
         this._property = property;
         this._instance = instance;
@@ -310,13 +319,17 @@ export class IMethodDecorator<T = any, O = any> {
         this._options = options;
     }
 
+    setMetadataKey(key: string | undefined) {
+        this._metadataKey = key;
+    }
+
     addParameter(item: IParameterDecorator) {
         this._parameters.add(item);
     }
 }
 export function getINgerDecorator<T = any, O = any>(type: Type<T>): INgerDecorator<T, O> {
     if (!Reflect.has(type, nger)) {
-        const value = new INgerDecorator();
+        const value = new INgerDecorator(type);
         Reflect.defineProperty(type, nger, {
             value
         });
