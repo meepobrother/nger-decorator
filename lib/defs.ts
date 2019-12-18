@@ -342,13 +342,20 @@ export function isGetOptions(val: any): val is GetOptions {
 interface ParameterHandler<O = any> {
     (arg: IConstructorDecorator<any, O> | IParameterDecorator<any, O>): void;
 }
-export function createParameterDecorator<O = any>(
+export interface NgerParameterDecorator<O, T> {
+    (opt?: O): ParameterDecorator
+    new(arg?: O): T;
+}
+export function createParameterDecorator<O = any, T = any>(
     metadataKey: string,
     beforeHandler?: ParameterHandler<O>,
     afterHandler?: ParameterHandler<O>
-): (opt?: O) => ParameterDecorator {
-    return (opts?: O): ParameterDecorator => {
-        return (target: any, property: TypeProperty | undefined, parameterIndex: number) => {
+): NgerParameterDecorator<O, T> {
+    function DecoratorFactory(this: any, opts?: O): ParameterDecorator {
+        if (this instanceof DecoratorFactory) {
+            return this as any;
+        }
+        function Decorator(target: any, property: TypeProperty | undefined, parameterIndex: number) {
             let parameterTypes = [];
             if (property) {
                 parameterTypes = getDesignParamTypes(target, property) || [];
@@ -380,19 +387,28 @@ export function createParameterDecorator<O = any>(
                 getGlobalAfterHanderAndCall(metadataKey, item)
             }
         }
+        return Decorator;
     }
+    DecoratorFactory.prototype.ngMetadataName = metadataKey;
+    return DecoratorFactory as any;
 }
 interface PropertyHandler<O = any> {
     (item: IPropertyDecorator<any, O>): void;
 }
-export function createPropertyDecorator<O = any>(
+export interface NgerPropertyDecorator<O, T> {
+    (opt?: O): PropertyDecorator
+    new(arg?: O): T;
+}
+export function createPropertyDecorator<O = any, T = any>(
     metadataKey: string,
     beforeHandler?: PropertyHandler<O>,
     afterHandler?: PropertyHandler
-): (opt?: O) => PropertyDecorator {
-    return (opts?: O): PropertyDecorator => {
-        return (target: any, property: TypeProperty) => {
-            // target是Class的instance
+): NgerPropertyDecorator<O, T> {
+    function DecoratorFactory(this: any, opts?: O): PropertyDecorator {
+        if (this instanceof DecoratorFactory) {
+            return this as any;
+        }
+        function Decorator(target: any, property: TypeProperty) {
             const propertyType = getDesignType(target, property)
             const type = target.constructor;
             const instance = target;
@@ -404,19 +420,28 @@ export function createPropertyDecorator<O = any>(
             afterHandler && afterHandler(item)
             getGlobalAfterHanderAndCall(metadataKey, item)
         }
+        return Decorator;
     }
+    DecoratorFactory.prototype.ngMetadataName = metadataKey;
+    return DecoratorFactory as any;
 }
 interface MethodHandler<O = any> {
     (item: IMethodDecorator<any, O>): void;
 }
-export function createMethodDecorator<O = any>(
+export interface NgerMethodDecorator<O, T> {
+    (opt?: O): MethodDecorator
+    new(arg?: O): T;
+}
+export function createMethodDecorator<O = any, T = any>(
     metadataKey: string,
     beforeHandler?: MethodHandler<O>,
     afterHandler?: MethodHandler<O>
-): (opt?: O) => MethodDecorator {
-    return (opts?: O): MethodDecorator => {
-        return (target: any, property: TypeProperty, descriptor: TypedPropertyDescriptor<any>) => {
-            // target是Class的instance
+): NgerMethodDecorator<O, T> {
+    function DecoratorFactory(this: any, opts?: O): MethodDecorator {
+        if (this instanceof DecoratorFactory) {
+            return this as any;
+        }
+        function Decorator(target: any, property: TypeProperty, descriptor: TypedPropertyDescriptor<any>) {
             const returnType = getDesignReturnType(target, property)
             const paramTypes = getDesignParamTypes(target, property) || [];
             const type = target.constructor;
@@ -430,19 +455,28 @@ export function createMethodDecorator<O = any>(
             afterHandler && afterHandler(item);
             getGlobalAfterHanderAndCall(metadataKey, item)
         }
+        return Decorator;
     }
+    DecoratorFactory.prototype.ngMetadataName = metadataKey;
+    return DecoratorFactory as any;
 }
 interface ClassHanlder<O = any> {
     (item: IClassDecorator<any, O>): void;
 }
-export function createClassDecorator<O>(
+export interface NgerClassDecorator<O, T> {
+    (opt?: O): ClassDecorator
+    new(arg?: O): T;
+}
+export function createClassDecorator<O = any, T = any>(
     metadataKey: string,
     beforeHandler?: ClassHanlder<O>,
     afterHandler?: ClassHanlder<O>
-): (opts?: O) => ClassDecorator {
-    return (opts?: O): ClassDecorator => {
-        return (target: any) => {
-            // target是class
+): NgerClassDecorator<O, T> {
+    function DecoratorFactory(this: any, opts?: O): ClassDecorator {
+        if (this instanceof DecoratorFactory) {
+            return this as any;
+        }
+        function Decorator(target: any) {
             const type = target;
             let options: any = opts;
             const params = getDesignTargetParams(target) || []
@@ -456,27 +490,42 @@ export function createClassDecorator<O>(
             afterHandler && afterHandler(item);
             getGlobalAfterHanderAndCall(metadataKey, item)
         }
+        return Decorator;
     }
+    DecoratorFactory.prototype.ngMetadataName = metadataKey;
+    return DecoratorFactory as any;
 }
-export function createDecorator<O>(
+interface Decorator<O, T> {
+    (opts?: O): (target: any, property: any, descriptor: any) => any;
+    new(opts?: O): T;
+}
+export function createDecorator<O = any, T = any>(
     metadataKey: string,
     beforeHandler?: CallHanlder<O>,
     afterHandler?: CallHanlder<O>
-): (opts?: O) => any {
-    return (opt?: O) => (target: any, property: any, descriptor: any) => {
-        if (property) {
-            if (typeof descriptor === 'undefined') {
-                return createPropertyDecorator(metadataKey, beforeHandler as any, afterHandler as any)(opt)(target, property);
-            } else if (typeof descriptor === 'number') {
-                return createParameterDecorator(metadataKey, beforeHandler as any, afterHandler as any)(opt)(target, property, descriptor);
-            } else {
-                return createMethodDecorator(metadataKey, beforeHandler as any, afterHandler as any)(opt)(target, property, descriptor);
-            }
-        } else {
-            if (typeof descriptor === 'number') {
-                return createParameterDecorator(metadataKey, beforeHandler as any, afterHandler as any)(opt)(target, property, descriptor)
-            }
-            return createClassDecorator(metadataKey, beforeHandler as any, afterHandler as any)(opt)(target);
+): Decorator<O, T> {
+    function DecoratorFactory(this: any, opt?: O): (target: any, property: any, descriptor: any) => any {
+        if (this instanceof DecoratorFactory) {
+            return this as any;
         }
+        function Decorator(target: any, property: any, descriptor: any) {
+            if (property) {
+                if (typeof descriptor === 'undefined') {
+                    return createPropertyDecorator(metadataKey, beforeHandler as any, afterHandler as any)(opt)(target, property);
+                } else if (typeof descriptor === 'number') {
+                    return createParameterDecorator(metadataKey, beforeHandler as any, afterHandler as any)(opt)(target, property, descriptor);
+                } else {
+                    return createMethodDecorator(metadataKey, beforeHandler as any, afterHandler as any)(opt)(target, property, descriptor);
+                }
+            } else {
+                if (typeof descriptor === 'number') {
+                    return createParameterDecorator(metadataKey, beforeHandler as any, afterHandler as any)(opt)(target, property, descriptor)
+                }
+                return createClassDecorator(metadataKey, beforeHandler as any, afterHandler as any)(opt)(target);
+            }
+        }
+        return Decorator;
     }
+    DecoratorFactory.prototype.ngMetadataName = metadataKey;
+    return DecoratorFactory as any;
 }
