@@ -1,16 +1,15 @@
-import { TypeProperty } from "./defs";
+import { createParameterDecorator } from "./defs";
 
-function DecoratorFactory(this: any, opts?: any): ParameterDecorator {
-    if (this instanceof DecoratorFactory) {
-        (this as any).opts = opts;
-        return this as any;
-    }
-    function Decorator(target: any, property: TypeProperty | undefined, parameterIndex: number) {
+const Demo = createParameterDecorator<string | { title: string }, { title: string }>(``)
 
-    }
-    return Decorator;
+export class DemoMethod {
+
+    onDemo(
+        @Demo(`1111`)
+        demo: string
+    ) { }
 }
-DecoratorFactory.prototype.ngMetadataName = `demo`;
-const test = new (DecoratorFactory as any)({ demo: `title` })
+
+const demo = new Demo({ title: 'ddd' })
 
 debugger;
