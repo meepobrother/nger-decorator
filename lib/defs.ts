@@ -2,7 +2,7 @@ import { getDesignType, getDesignParamTypes, getDesignReturnType, getDesignTarge
 import { clsStore } from "./store";
 const nger = Symbol.for(`__nger__decorator__`);
 export type TypeProperty = string | symbol;
-type CallHanlder<O> = ClassHanlder<O> | PropertyHandler<O> | MethodHandler<O> | ParameterHandler<O>;
+export type CallHanlder<O> = ClassHanlder<O> | PropertyHandler<O> | MethodHandler<O> | ParameterHandler<O>;
 let _globalAfterHandlers: Map<string, CallHanlder<any>> = new Map();
 let _globalBeforeHandlers: Map<string, CallHanlder<any>> = new Map();
 export function setGlobalBeforeHandlers(handlers: Map<string, CallHanlder<any>>) {
@@ -11,24 +11,24 @@ export function setGlobalBeforeHandlers(handlers: Map<string, CallHanlder<any>>)
 export function setGlobalAfterHandlers(handlers: Map<string, CallHanlder<any>>) {
     _globalAfterHandlers = handlers;
 }
-function getGlobalBeforeHanderAndCall(key: string, item: any) {
+export function getGlobalBeforeHanderAndCall(key: string, item: any) {
     const handler = _globalBeforeHandlers.get(key);
     if (handler) handler(item);
 }
-function getGlobalAfterHanderAndCall(key: string, item: any) {
+export function getGlobalAfterHanderAndCall(key: string, item: any) {
     const handler = _globalAfterHandlers.get(key);
     if (handler) handler(item);
 }
-interface ClassOptions<T, O> {
+export interface ClassOptions<T, O> {
     (target: Type<T>): O;
 }
-interface PropertyOptions<T, O> {
+export interface PropertyOptions<T, O> {
     (target: Type<T>, instance: T, property: TypeProperty, propertyType: any): O;
 }
-interface ParameterOptions<T, O> {
+export interface ParameterOptions<T, O> {
     (target: Type<T>, instance: T, property: TypeProperty | undefined, parameterIndex: number): O;
 }
-interface MethodOptions<T, O> {
+export interface MethodOptions<T, O> {
     (target: Type<T>, instance: T, property: TypeProperty, descriptor: TypedPropertyDescriptor<any>): O
 }
 export type GetOptions<T = any, O = any> = ClassOptions<T, O> | PropertyOptions<T, O> | ParameterOptions<T, O> | MethodOptions<T, O>;
@@ -339,7 +339,7 @@ export function getINgerDecorator<T = any, O = any>(type: Type<T>): INgerDecorat
 export function isGetOptions(val: any): val is GetOptions {
     return typeof val === 'function';
 }
-interface ParameterHandler<O = any> {
+export interface ParameterHandler<O = any> {
     (arg: IConstructorDecorator<any, O> | IParameterDecorator<any, O>): void;
 }
 export interface NgerParameterDecorator<O, T> {
@@ -392,7 +392,7 @@ export function createParameterDecorator<O = any, T = any>(
     DecoratorFactory.prototype.ngMetadataName = metadataKey;
     return DecoratorFactory as any;
 }
-interface PropertyHandler<O = any> {
+export interface PropertyHandler<O = any> {
     (item: IPropertyDecorator<any, O>): void;
 }
 export interface NgerPropertyDecorator<O, T> {
@@ -425,7 +425,7 @@ export function createPropertyDecorator<O = any, T = any>(
     DecoratorFactory.prototype.ngMetadataName = metadataKey;
     return DecoratorFactory as any;
 }
-interface MethodHandler<O = any> {
+export interface MethodHandler<O = any> {
     (item: IMethodDecorator<any, O>): void;
 }
 export interface NgerMethodDecorator<O, T> {
@@ -460,7 +460,7 @@ export function createMethodDecorator<O = any, T = any>(
     DecoratorFactory.prototype.ngMetadataName = metadataKey;
     return DecoratorFactory as any;
 }
-interface ClassHanlder<O = any> {
+export interface ClassHanlder<O = any> {
     (item: IClassDecorator<any, O>): void;
 }
 export interface NgerClassDecorator<O, T> {
@@ -495,7 +495,7 @@ export function createClassDecorator<O = any, T = any>(
     DecoratorFactory.prototype.ngMetadataName = metadataKey;
     return DecoratorFactory as any;
 }
-interface Decorator<O, T> {
+export interface Decorator<O, T> {
     (opts?: O): (target: any, property: any, descriptor: any) => any;
     new(opts?: O): T;
 }

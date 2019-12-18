@@ -7,7 +7,6 @@ export class DecoratorStore {
         allTypes.add(val);
         this.map.set(metadataKey, allTypes);
     }
-
     get<T>(metadataKey: string): Set<T> {
         let allTypes = this.map.get(metadataKey);
         if (!allTypes) {

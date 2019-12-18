@@ -1,3 +1,3 @@
 export * from './util';
 export * from './defs';
-export { clsStore } from './store';
+export { clsStore, DecoratorStore } from './store';
