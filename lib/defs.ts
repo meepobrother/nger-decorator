@@ -342,17 +342,22 @@ export function isGetOptions(val: any): val is GetOptions {
 export interface ParameterHandler<O = any> {
     (arg: IConstructorDecorator<any, O> | IParameterDecorator<any, O>): void;
 }
-export interface NgerParameterDecorator<O, T> {
+export interface NgerDecorator<O> {
+    options?: O;
+    ngMetadataName: string;
+}
+export interface NgerParameterDecorator<O> {
     (opt?: O): ParameterDecorator
-    new(arg?: O): T;
+    new(arg?: O): NgerDecorator<O>;
 }
 export function createParameterDecorator<O = any, T = any>(
     metadataKey: string,
     beforeHandler?: ParameterHandler<O>,
     afterHandler?: ParameterHandler<O>
-): NgerParameterDecorator<O, T> {
+): NgerParameterDecorator<O> {
     function DecoratorFactory(this: any, opts?: O): ParameterDecorator {
         if (this instanceof DecoratorFactory) {
+            (this as NgerDecorator<O>).options = opts;
             return this as any;
         }
         function Decorator(target: any, property: TypeProperty | undefined, parameterIndex: number) {
@@ -395,17 +400,18 @@ export function createParameterDecorator<O = any, T = any>(
 export interface PropertyHandler<O = any> {
     (item: IPropertyDecorator<any, O>): void;
 }
-export interface NgerPropertyDecorator<O, T> {
+export interface NgerPropertyDecorator<O> {
     (opt?: O): PropertyDecorator
-    new(arg?: O): T;
+    new(arg?: O): NgerDecorator<O>;
 }
 export function createPropertyDecorator<O = any, T = any>(
     metadataKey: string,
     beforeHandler?: PropertyHandler<O>,
     afterHandler?: PropertyHandler
-): NgerPropertyDecorator<O, T> {
+): NgerPropertyDecorator<O> {
     function DecoratorFactory(this: any, opts?: O): PropertyDecorator {
         if (this instanceof DecoratorFactory) {
+            (this as NgerDecorator<O>).options = opts;
             return this as any;
         }
         function Decorator(target: any, property: TypeProperty) {
@@ -428,17 +434,18 @@ export function createPropertyDecorator<O = any, T = any>(
 export interface MethodHandler<O = any> {
     (item: IMethodDecorator<any, O>): void;
 }
-export interface NgerMethodDecorator<O, T> {
+export interface NgerMethodDecorator<O> {
     (opt?: O): MethodDecorator
-    new(arg?: O): T;
+    new(arg?: O): NgerDecorator<O>;
 }
 export function createMethodDecorator<O = any, T = any>(
     metadataKey: string,
     beforeHandler?: MethodHandler<O>,
     afterHandler?: MethodHandler<O>
-): NgerMethodDecorator<O, T> {
+): NgerMethodDecorator<O> {
     function DecoratorFactory(this: any, opts?: O): MethodDecorator {
         if (this instanceof DecoratorFactory) {
+            (this as NgerDecorator<O>).options = opts;
             return this as any;
         }
         function Decorator(target: any, property: TypeProperty, descriptor: TypedPropertyDescriptor<any>) {
@@ -463,17 +470,18 @@ export function createMethodDecorator<O = any, T = any>(
 export interface ClassHanlder<O = any> {
     (item: IClassDecorator<any, O>): void;
 }
-export interface NgerClassDecorator<O, T> {
+export interface NgerClassDecorator<O> {
     (opt?: O): ClassDecorator
-    new(arg?: O): T;
+    new(arg?: O): NgerDecorator<O>;
 }
 export function createClassDecorator<O = any, T = any>(
     metadataKey: string,
     beforeHandler?: ClassHanlder<O>,
     afterHandler?: ClassHanlder<O>
-): NgerClassDecorator<O, T> {
+): NgerClassDecorator<O> {
     function DecoratorFactory(this: any, opts?: O): ClassDecorator {
         if (this instanceof DecoratorFactory) {
+            (this as NgerDecorator<O>).options = opts;
             return this as any;
         }
         function Decorator(target: any) {
@@ -495,17 +503,18 @@ export function createClassDecorator<O = any, T = any>(
     DecoratorFactory.prototype.ngMetadataName = metadataKey;
     return DecoratorFactory as any;
 }
-export interface Decorator<O, T> {
+export interface Decorator<O> {
     (opts?: O): (target: any, property: any, descriptor: any) => any;
-    new(opts?: O): T;
+    new(opts?: O): NgerDecorator<O>;
 }
 export function createDecorator<O = any, T = any>(
     metadataKey: string,
     beforeHandler?: CallHanlder<O>,
     afterHandler?: CallHanlder<O>
-): Decorator<O, T> {
+): Decorator<O> {
     function DecoratorFactory(this: any, opt?: O): (target: any, property: any, descriptor: any) => any {
         if (this instanceof DecoratorFactory) {
+            (this as NgerDecorator<O>).options = opt;
             return this as any;
         }
         function Decorator(target: any, property: any, descriptor: any) {
